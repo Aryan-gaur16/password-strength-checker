@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  # this is the main app service
+  app:
+    # This builds the docker image from our Dockerfile
+    build: .
+
+    # map port is 5000 on my computer to port 5000 in the container
+    ports:
+      - "5000:5000"
+
+    # restarts the container if it crashes
+    restart: always
+
+    # sets some of the environment variables
+    environment:
+      - FLASK_ENV=production
+
+  # required in the monitoring stage
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+
+  # this is for the grafana dashboard
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    restart: always
