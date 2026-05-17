@@ -1,44 +1,39 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHON = 'C:\\msys64\\mingw64\\bin\\python.exe'
-        PIP = 'C:\\msys64\\mingw64\\bin\\pip.exe'
-    }
-
     stages {
 
-        // This is the build stage for my pipeline
+        //  Build stage
         stage('Build') {
             steps {
                 echo 'Installing all dependencies required'
-                bat '"C:\\msys64\\mingw64\\bin\\pip.exe" install -r requirements.txt'
+                bat 'C:\\Users\\Aryan\\Python\\Scripts\\pip.exe install -r requirements.txt'
             }
         }
 
-        //  Test stage
+        //  Test
         stage('Test') {
             steps {
                 echo 'Running tests on the code'
-                bat '"C:\\msys64\\mingw64\\bin\\python.exe" -m pytest test_app.py -v'
+                bat 'C:\\Users\\Aryan\\Python\\python.exe -m pytest test_app.py -v'
             }
         }
 
-        // Code Quality stage
+        //  Code Quality testing
         stage('Code Quality') {
             steps {
-                echo 'Running the code quality check '
-                bat '"C:\\msys64\\mingw64\\bin\\pip.exe" install pylint'
-                bat '"C:\\msys64\\mingw64\\bin\\python.exe" -m pylint app.py checker.py --fail-under=5'
+                echo 'Running code for quality check'
+                bat 'C:\\Users\\Aryan\\Python\\Scripts\\pip.exe install pylint'
+                bat 'C:\\Users\\Aryan\\Python\\python.exe -m pylint app.py checker.py --fail-under=5'
             }
         }
 
-        // This checks the Security
+        // Security
         stage('Security') {
             steps {
-                echo 'Running the security scan on your code'
-                bat '"C:\\msys64\\mingw64\\bin\\pip.exe" install bandit'
-                bat '"C:\\msys64\\mingw64\\bin\\python.exe" -m bandit -r . --exit-zero'
+                echo 'Running security scan'
+                bat 'C:\\Users\\Aryan\\Python\\Scripts\\pip.exe install bandit'
+                bat 'C:\\Users\\Aryan\\Python\\python.exe -m bandit -r . --exit-zero'
             }
         }
 
@@ -53,20 +48,20 @@ pipeline {
             }
         }
 
-        //  Release stage
+        // Release stage
         stage('Release') {
             steps {
-                echo 'Releasing to production environment...'
+                echo 'Releasing to the production environment'
                 bat 'docker stop password-checker-prod || true'
                 bat 'docker rm password-checker-prod || true'
                 bat 'docker run -d --name password-checker-prod -p 5001:5000 password-checker'
             }
         }
 
-        //  Monitoring phase
+        // Monitoring stage
         stage('Monitoring') {
             steps {
-                echo 'Starting monitoring with Prometheus and Grafana...'
+                echo 'Starting the monitoring phase with Prometheus and Grafana'
                 bat 'docker-compose up -d prometheus grafana'
                 echo 'Prometheus running at http://localhost:9090'
                 echo 'Grafana running at http://localhost:3000'
