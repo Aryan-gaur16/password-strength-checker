@@ -1,46 +1,51 @@
 pipeline {
     agent any
 
+    environment {
+        PYTHON = 'C:\\msys64\\mingw64\\bin\\python.exe'
+        PIP = 'C:\\msys64\\mingw64\\bin\\pip.exe'
+    }
+
     stages {
 
-        // Stage 1 - Build
+        // This is the build stage for my pipeline
         stage('Build') {
             steps {
-                echo 'Installing all the dependencies required'
-                bat 'pip install -r requirements.txt'
+                echo 'Installing all dependencies required'
+                bat '"C:\\msys64\\mingw64\\bin\\pip.exe" install -r requirements.txt'
             }
         }
 
-        // Stage 2 - Test
+        //  Test stage
         stage('Test') {
             steps {
                 echo 'Running tests on the code'
-                bat 'pytest test_app.py -v'
+                bat '"C:\\msys64\\mingw64\\bin\\python.exe" -m pytest test_app.py -v'
             }
         }
 
-        // Stage 3 - Code Quality
+        // Code Quality stage
         stage('Code Quality') {
             steps {
-                echo 'Running the code quality checker'
-                bat 'pip install pylint'
-                bat 'pylint app.py checker.py --fail-under=5'
+                echo 'Running the code quality check '
+                bat '"C:\\msys64\\mingw64\\bin\\pip.exe" install pylint'
+                bat '"C:\\msys64\\mingw64\\bin\\python.exe" -m pylint app.py checker.py --fail-under=5'
             }
         }
 
-        // Stage 4 - Security
+        // This checks the Security
         stage('Security') {
             steps {
-                echo 'Running the security scan'
-                bat 'pip install bandit'
-                bat 'bandit -r . --exit-zero'
+                echo 'Running the security scan on your code'
+                bat '"C:\\msys64\\mingw64\\bin\\pip.exe" install bandit'
+                bat '"C:\\msys64\\mingw64\\bin\\python.exe" -m bandit -r . --exit-zero'
             }
         }
 
-        // Stage 5 - Deploy
+        //  Deployment stage
         stage('Deploy') {
             steps {
-                echo 'Deploying to the staging environment'
+                echo 'Deploying to staging environment'
                 bat 'docker build -t password-checker .'
                 bat 'docker stop password-checker-staging || true'
                 bat 'docker rm password-checker-staging || true'
@@ -48,20 +53,20 @@ pipeline {
             }
         }
 
-        // Stage 6 - Release
+        //  Release stage
         stage('Release') {
             steps {
-                echo 'Releasing to production environment'
+                echo 'Releasing to production environment...'
                 bat 'docker stop password-checker-prod || true'
                 bat 'docker rm password-checker-prod || true'
                 bat 'docker run -d --name password-checker-prod -p 5001:5000 password-checker'
             }
         }
 
-        // Stage 7 - Monitoring
+        //  Monitoring phase
         stage('Monitoring') {
             steps {
-                echo 'Starting the monitoring phase with Prometheus and Grafana'
+                echo 'Starting monitoring with Prometheus and Grafana...'
                 bat 'docker-compose up -d prometheus grafana'
                 echo 'Prometheus running at http://localhost:9090'
                 echo 'Grafana running at http://localhost:3000'
@@ -71,7 +76,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline has completed successfully!'
+            echo 'The pipeline has completed successfully!'
         }
         failure {
             echo 'Error, Pipeline has failed. Please check the logs.'
