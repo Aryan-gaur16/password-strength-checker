@@ -36,35 +36,34 @@ pipeline {
                 bat 'C:\\Users\\Aryan\\Python\\python.exe -m bandit -r . --exit-zero'
             }
         }
-
         //  Deployment stage
         stage('Deploy') {
             steps {
-                echo 'Deploying to staging environment'
-                bat 'docker build -t password-checker .'
-                bat 'docker stop password-checker-staging || true'
-                bat 'docker rm password-checker-staging || true'
-                bat 'docker run -d --name password-checker-staging -p 5000:5000 password-checker'
+               echo 'Deploying to staging environment...'
+               bat 'docker build -t password-checker .'
+               bat 'docker stop password-checker-staging & exit 0'
+               bat 'docker rm password-checker-staging & exit 0'
+               bat 'docker run -d --name password-checker-staging -p 5000:5000 password-checker'
             }
         }
 
-        // Release stage
+        //  Release stage
         stage('Release') {
             steps {
-                echo 'Releasing to the production environment'
-                bat 'docker stop password-checker-prod || true'
-                bat 'docker rm password-checker-prod || true'
-                bat 'docker run -d --name password-checker-prod -p 5001:5000 password-checker'
+               echo 'Releasing to production environment...'
+               bat 'docker stop password-checker-prod & exit 0'
+               bat 'docker rm password-checker-prod & exit 0'
+               bat 'docker run -d --name password-checker-prod -p 5001:5000 password-checker'
             }
         }
 
-        // Monitoring stage
+        // Monitoring phase
         stage('Monitoring') {
             steps {
-                echo 'Starting the monitoring phase with Prometheus and Grafana'
-                bat 'docker-compose up -d prometheus grafana'
-                echo 'Prometheus running at http://localhost:9090'
-                echo 'Grafana running at http://localhost:3000'
+              echo 'Starting monitoring with Prometheus and Grafana...'
+              bat 'docker-compose up -d prometheus grafana'
+              echo 'Prometheus running at http://localhost:9090'
+              echo 'Grafana running at http://localhost:3000'
             }
         }
     }
